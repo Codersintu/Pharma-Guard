@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+
 
 export default function Hero() {
     return (
@@ -52,7 +54,7 @@ export default function Hero() {
 
                     {/* Buttons */}
                     <div className="flex gap-4 mt-8">
-
+                    <Link href="/analyze">
                         <button className="inline-flex items-center gap-2 cursor-pointer
                             bg-gradient-to-br from-[#00c9b1] to-[#00b5a0]
                             text-[#061a2b]
@@ -66,6 +68,7 @@ export default function Hero() {
                             active:translate-y-0">
                             ✓ Analyze Patient
                         </button>
+                        </Link>
 
                         <button className="border border-gray-600 text-gray-300 px-6 py-3 rounded-lg hover:bg-white/5 transition">
                             ▶ Watch Demo
