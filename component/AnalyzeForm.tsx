@@ -1,19 +1,12 @@
 "use client";
+import clsx from "clsx";
 
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import clsx from "clsx";
 import axios from "axios";
 import { BACKEND_URL } from "@/config";
 import { Loader } from "lucide-react";
 
-interface AnalysisResult {
-    patient_id: string;
-    drug: string;
-    risk: string;
-    confidence: number;
-    severity: string;
-}
 
 const drugs = [
     ["CODEINE", "Opioid Analgesic"],
@@ -29,7 +22,7 @@ export default function AnalyzeForm() {
     const { register, handleSubmit, setError, formState: { errors, isSubmitting }, watch } = useForm();
 
     const [file, setFile] = useState<File | null>(null);
-    const [result, setResult] = useState<AnalysisResult | null>(null);
+    const [result, setResult] = useState<any>(null);
 
     const validateFile = (files: any) => {
 
@@ -49,7 +42,7 @@ export default function AnalyzeForm() {
     };
 
     const submit = async (data: any) => {
-        console.log(data)
+    
         try {
             if (!file) {
                 setError("vcf", { message: "VCF file required" });
@@ -71,7 +64,7 @@ export default function AnalyzeForm() {
                 }
             );
 
-            setResult(res.data.data);
+            setResult(res.data.result);
         } catch (error: any) {
             setError("root", {
                 message: error.response?.data?.message || "An error occurred",
@@ -219,7 +212,8 @@ function Error({ e }: any) {
     );
 }
 
-function ResultUI({ result }: { result: AnalysisResult }) {
+
+function ResultUI({ result }: any) {
 
     const colors: Record<string, string> = {
         Safe: "border-green-500 bg-green-50 text-green-700",
@@ -227,49 +221,43 @@ function ResultUI({ result }: { result: AnalysisResult }) {
         Toxic: "border-red-500 bg-red-50 text-red-700",
     };
 
-    return (
+    const riskColor = colors[result?.risk] || "border-gray-300 bg-gray-50";
 
-        <div className="space-y-6">
+return (
 
-            {/* Legend */}
-            <div className="bg-white rounded-xl p-6 border shadow-sm">
+    <div className="space-y-6">
 
-                <div className="font-semibold mb-4">
-                    Risk Label Legend
-                </div>
+        {/* Legend */}
+        <div className="bg-white rounded-xl p-6 border shadow-sm">
 
-                <div className="grid grid-cols-5 gap-3">
-
-                    {Object.entries(colors).map(([k, v]) => (
-
-                        <div key={k}
-                            className={clsx("border rounded-lg p-4 text-center", v)}>
-
-                            <div className="font-semibold">
-                                {k}
-                            </div>
-
-                        </div>
-
-                    ))}
-
-                </div>
-
+            <div className="font-semibold mb-3">
+                Risk Label
             </div>
 
-            {/* Result card */}
+            <div className={clsx(
+                "border rounded-lg p-4 text-center font-semibold text-lg",
+                colors[result.risk]
+            )}>
+                {result.risk}
+            </div>
+
+        </div>
+
+        {/* Risk Assessment Card */}
             <div className="bg-white border rounded-xl p-6 shadow-sm">
 
                 <div className="font-semibold mb-3">
                     Risk Assessment
                 </div>
 
-                <div className={clsx("border rounded-lg p-4", colors[result.risk])}>
+                <div className={clsx("border rounded-lg p-4", riskColor)}>
 
-                    {result.risk}
+                    <div className="font-semibold text-lg">
+                        {result?.risk}
+                    </div>
 
                     <div className="text-sm mt-1">
-                        Confidence {result.confidence}%
+                        Confidence: {result?.confidence}%
                     </div>
 
                 </div>
@@ -284,27 +272,33 @@ function ResultUI({ result }: { result: AnalysisResult }) {
                 </div>
 
                 <p className="text-gray-600 text-sm">
-                    Based on CYP2C9 genotype, patient metabolizes warfarin slowly,
-                    requiring dosage adjustment.
+                    {result?.explanation || "No explanation available"}
                 </p>
 
             </div>
 
-            {/* JSON */}
+            {/* JSON Actions */}
             <div className="bg-white border rounded-xl p-6 shadow-sm flex gap-3">
 
                 <button
                     onClick={() => {
-                        navigator.clipboard.writeText(JSON.stringify(result, null, 2))
+                        navigator.clipboard.writeText(
+                            JSON.stringify(result?.raw || result, null, 2)
+                        );
                     }}
-                    className="border px-4 py-2 rounded-lg">
+                    className="border px-4 py-2 rounded-lg hover:bg-gray-50"
+                >
                     Copy JSON
                 </button>
 
                 <button
                     onClick={() => {
 
-                        const blob = new Blob([JSON.stringify(result, null, 2)]);
+                        const blob = new Blob(
+                            [JSON.stringify(result?.raw || result, null, 2)],
+                            { type: "application/json" }
+                        );
+
                         const url = URL.createObjectURL(blob);
 
                         const a = document.createElement("a");
@@ -312,8 +306,11 @@ function ResultUI({ result }: { result: AnalysisResult }) {
                         a.download = "result.json";
                         a.click();
 
+                        URL.revokeObjectURL(url);
+
                     }}
-                    className="border px-4 py-2 rounded-lg">
+                    className="border px-4 py-2 rounded-lg hover:bg-gray-50"
+                >
                     Download JSON
                 </button>
 
@@ -322,4 +319,5 @@ function ResultUI({ result }: { result: AnalysisResult }) {
         </div>
 
     );
+
 }
