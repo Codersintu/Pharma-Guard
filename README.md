@@ -30,3 +30,4 @@ PHARMA-GUARD-FRONTEND/
 
 Frontend is deployed and accessible at:https://pharma-guard-six.vercel.app
 
+backend URL:https://pharma-guard-backend-1.onrender.com
