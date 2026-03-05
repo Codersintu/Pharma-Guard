@@ -21,7 +21,6 @@ export default function Navbar() {
                     <a href="#workflow" className="text-gray-300 hover:text-gray-200 hidden md:flex">
                         Workflow
                     </a>
-                    <button className="px-6 py-2 bg-linear-to-r from-cyan-300 to-teal-400 rounded-xl text-black cursor-pointer font-medium hover:opacity-90">Login</button>
                 </div>
             </div>
         </div>

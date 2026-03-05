@@ -4,6 +4,7 @@ import Card from "./Card";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { analyzePatient } from "@/lib/api";
+import { Loader } from "lucide-react";
 
 const drugs = [
     ["CODEINE", "Opioid Analgesic"],
@@ -18,8 +19,23 @@ type FormDataType = {
     vcf: FileList;
     drug: string[];
 }
+type RiskType =
+  | "Toxicity Risk"
+  | "Bleeding Risk"
+  | "Ineffective"
+  | "Muscle Toxicity Risk"
+  | "Severe Toxicity Risk";
+
+const riskColorMap: Record<RiskType, string> = {
+  "Toxicity Risk": "text-red-700",
+  "Bleeding Risk": "text-orange-600",
+  "Ineffective": "text-yellow-600",
+  "Muscle Toxicity Risk": "text-red-600",
+  "Severe Toxicity Risk": "text-red-900"
+};
 export default function AnalyzeForm() {
     const [files, setFile] = useState<File | null>(null);
+    const [showAI, setShowAI] = useState(false);
     const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormDataType>();
     const watchFile = watch('vcf');
     const validateFile = (files: FileList) => {
@@ -47,11 +63,12 @@ export default function AnalyzeForm() {
         mutationFn: (formData: FormData) => analyzePatient(formData)
     })
 
+    const response = mutation.data;
 
     return (
-        <div className="">
+        <div className="dark:text-white">
             <form onSubmit={handleSubmit(Onsubmit)}>
-                <div className="flex gap-8">
+                <div className="flex flex-col md:flex-row gap-8 lg:flex-row">
                     <Card num={1} title="Genomic Data Upload" desc="Upload VCF file containing genetic variants">
                         <label className="border border-dashed border-gray-400 rounded-lg px-30 py-10 flex flex-col items-center cursor-pointer hover:border-teal-500 hover:bg-gray-100">
                             <input
@@ -91,8 +108,8 @@ export default function AnalyzeForm() {
                                         {...register("drug", { required: "atleast select one drug" })}
                                         className="mb-1" />
 
-                                    <div className="font-medium ">{d[0]}</div>
-                                    <div className="text-sm text-gray-500">{d[1]}</div>
+                                    <div className="font-medium truncate">{d[0]}</div>
+                                    <div className="text-sm text-gray-500 ">{d[1]}</div>
                                 </label>
                             ))}
 
@@ -104,32 +121,74 @@ export default function AnalyzeForm() {
                         </div>
                     </Card>
                 </div>
-
-                <button disabled={mutation.isPending} type="submit" className="mt-8 w-full px-6 py-3 bg-teal-500 text-white rounded-xl hover:bg-teal-600 transition-colors cursor-pointer">
-                    {mutation.isPending
-                        ? "Analyzing..."
-                        : "Analyze Patient Risk"}
-                </button>
+                {mutation.isPending ? <div className="w-full mt-8 flex items-center justify-center"><Loader className="animate-spin w-12 h-12" /></div> :
+                    <button disabled={mutation.isPending} type="submit" className="mt-8 w-full px-6 py-3 bg-teal-500 text-white rounded-xl hover:bg-teal-600 transition-colors cursor-pointer">
+                        "Analyze Patient Risk"
+                    </button>
+                }
             </form>
 
-             {mutation.isSuccess && (
-        <div className="mt-6 p-4 border rounded bg-green-50">
-          <h3 className="font-bold mb-2">Analysis Result</h3>
-          <pre>
-            {JSON.stringify(mutation.data, null, 2)}
-          </pre>
-        </div>
-      )}
+            {mutation.isSuccess && (
+                <div className="mt-6 p-6 border rounded-xl bg-green-50 space-y-6 shadow-sm">
 
-      {/* ERROR DISPLAY */}
-      {mutation.isError && (
-        <div className="mt-6 p-4 border rounded bg-red-50 text-red-600">
-          {(
-            mutation.error as any
-          )?.response?.data?.message ||
-            "Something went wrong"}
-        </div>
-      )}
+                    <h3 className="font-bold text-2xl text-green-700">
+                        {response.message}
+                    </h3>
+
+                    {/* Risk Section */}
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-xl text-gray-700 font-bold">
+                            Risk Label:
+                        </h1>
+
+                        <p
+                            className={`font-semibold text-lg ${riskColorMap[response.result.risk as RiskType] || "text-gray-700"
+                                }`}
+                        >
+                            {response.result.risk}
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-xl text-gray-700 font-bold">Confidence_Score:</h1>
+                        <span className="bg-yellow-400 p-2 rounded-xl text-xl">{response.result.raw.risk_assessment.confidence_score}</span>
+                    </div>
+
+                    {/* AI Summary Toggle */}
+                    <div className="flex items-center justify-between">
+
+                        <h2 className="text-lg font-semibold text-teal-600">
+                            🤖 AI Clinical Summary
+                        </h2>
+
+                        <button
+                            onClick={() => setShowAI(!showAI)}
+                            className="px-4 py-1 text-sm bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition"
+                        >
+                            {showAI ? "Hide Summary" : "Show Summary"}
+                        </button>
+
+                    </div>
+
+                    {/* AI Explanation */}
+                    {showAI && (
+                        <p className="text-gray-700 leading-relaxed bg-white p-4 rounded-lg border">
+                            {response.result.explanation}
+                        </p>
+                    )}
+
+                </div>
+            )}
+
+            {/* ERROR DISPLAY */}
+            {mutation.isError && (
+                <div className="mt-6 p-4 border rounded bg-red-50 text-red-600">
+                    {(
+                        mutation.error as any
+                    )?.response?.data?.message ||
+                        "Something went wrong"}
+                </div>
+            )}
         </div>
     )
 }
