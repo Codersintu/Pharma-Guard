@@ -1,12 +1,9 @@
 "use client";
-import clsx from "clsx";
-
 import { useForm } from "react-hook-form";
+import Card from "./Card";
 import { useState } from "react";
-import axios from "axios";
-import { BACKEND_URL } from "@/config";
-import { Loader } from "lucide-react";
-
+import { useMutation } from "@tanstack/react-query";
+import { analyzePatient } from "@/lib/api";
 
 const drugs = [
     ["CODEINE", "Opioid Analgesic"],
@@ -17,307 +14,124 @@ const drugs = [
     ["FLUOROURACIL", "Chemotherapy"],
 ];
 
+type FormDataType = {
+    vcf: FileList;
+    drug: string[];
+}
 export default function AnalyzeForm() {
+    const [files, setFile] = useState<File | null>(null);
+    const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormDataType>();
+    const watchFile = watch('vcf');
+    const validateFile = (files: FileList) => {
+        if (!files.length) return "vcf file required!"
+        const file = files[0];
+        console.log(file)
 
-    const { register, handleSubmit, setError, formState: { errors, isSubmitting }, watch } = useForm();
+        if (!file.name.endsWith(".vcf")) return "only vcf file require."
 
-    const [file, setFile] = useState<File | null>(null);
-    const [result, setResult] = useState<any>(null);
+        if (file.size > 5 * 1024 * 1024) return "file size must 5MB"
 
-    const validateFile = (files: any) => {
+        setFile(file);
+        return true
+    }
 
-        if (!files.length) return "VCF required";
+    const Onsubmit = async (data: FormDataType) => {
+        const formData = new FormData();
+        formData.append("vcfFile", data.vcf[0]);
+        formData.append("drugs", data.drug.join(","));
 
-        const f = files[0];
+        mutation.mutate(formData);
+    }
 
-        if (!f.name.endsWith(".vcf"))
-            return "Only VCF allowed";
+    const mutation = useMutation({
+        mutationFn: (formData: FormData) => analyzePatient(formData)
+    })
 
-        if (f.size > 5 * 1024 * 1024)
-            return "Max 5MB";
-
-        setFile(f);
-
-        return true;
-    };
-
-    const submit = async (data: any) => {
-    
-        try {
-            if (!file) {
-                setError("vcf", { message: "VCF file required" });
-                return;
-            }
-
-            const formData = new FormData();
-
-            formData.append("vcfFile", file);
-            formData.append("drugs", data.drug.join(","));
-
-            const res = await axios.post(
-                `${BACKEND_URL}/api/v1/analyze`,
-                formData,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                }
-            );
-
-            setResult(res.data.result);
-        } catch (error: any) {
-            setError("root", {
-                message: error.response?.data?.message || "An error occurred",
-            })
-        }
-
-    };
 
     return (
-
-        <div className="max-w-3xl mx-auto px-6 mt-8 pb-20 ">
-
-            {!result && (
-                <form onSubmit={handleSubmit(submit)} className="space-y-6">
-
-
-                    {/* Upload card */}
-                    <Card num="2" title="Genomic Data Upload"
-                        desc="Upload VCF file containing genetic variants">
-
-                        <label className="border-2 border-dashed border-gray-300 hover:border-cyan-400 rounded-xl p-10 flex flex-col items-center cursor-pointer bg-gray-50">
-
+        <div className="">
+            <form onSubmit={handleSubmit(Onsubmit)}>
+                <div className="flex gap-8">
+                    <Card num={1} title="Genomic Data Upload" desc="Upload VCF file containing genetic variants">
+                        <label className="border border-dashed border-gray-400 rounded-lg px-30 py-10 flex flex-col items-center cursor-pointer hover:border-teal-500 hover:bg-gray-100">
                             <input
                                 type="file"
-                                hidden
                                 accept=".vcf"
+                                hidden
                                 {...register("vcf", { validate: validateFile })}
                             />
-
-                            <div className="text-3xl mb-2">🧬</div>
-
-                            <div className="font-medium">
-                                Drag & drop your VCF file here
-                            </div>
-
-                            <div className="text-sm text-gray-500">
-                                Supports .vcf · Max 5MB
-                            </div>
-
-                            <button type="submit"
-                                className="mt-3 border border-cyan-500 text-cyan-600 px-4 py-1 rounded-lg text-sm">
-                                Browse Files
-                            </button>
-
-                            {file && (
-                                <div className="text-green-600 mt-2 text-sm">
-                                    {file.name}
+                            <div className="flex flex-col items-center">
+                                <div className="text-4xl mb-2">🧬</div>
+                                <div className="font-medium">
+                                    Drag & drop your VCF file here
                                 </div>
-                            )}
+
+                                <div className="text-sm text-gray-500">
+                                    Supports .vcf · Max 5MB
+                                </div>
+                                {errors.vcf && (
+                                    <p className="text-red-500">
+                                        {errors.vcf.message}
+                                    </p>
+                                )}
+                                {watchFile?.[0] && <div className="mt-2 text-green-600">
+                                    {watchFile[0].name}
+                                </div>}
+                            </div>
 
                         </label>
-
-                        <Error e={errors.vcf} />
-
                     </Card>
 
-                    {/* Drug card */}
-                    <Card num="3" title="Drug Selection"
-                        desc="Select drugs to analyze">
-
-                        <div className="grid grid-cols-2 gap-3">
-
-                            {drugs.map(d => (
-
-                                <label key={d[0]}
-                                    className="border border-gray-300 rounded-lg p-3 hover:border-cyan-400 cursor-pointer">
-
+                    <Card num={2} title="Drug Selection" desc="Select drugs to analyze">
+                        <div className="grid grid-cols-3 gap-3">
+                            {drugs.map((d, idx) => (
+                                <label key={idx} className="border border-gray-300 rounded-lg p-3 hover:border-cyan-400 cursor-pointer">
                                     <input type="checkbox"
                                         value={d[0]}
-                                        {...register("drug", { required: "Select drug" })}
+                                        {...register("drug", { required: "atleast select one drug" })}
                                         className="mb-1" />
 
-                                    <div className="font-semibold text-sm">
-                                        {d[0]}
-                                    </div>
-
-                                    <div className="text-xs text-gray-500">
-                                        {d[1]}
-                                    </div>
-
+                                    <div className="font-medium ">{d[0]}</div>
+                                    <div className="text-sm text-gray-500">{d[1]}</div>
                                 </label>
-
                             ))}
 
+                            {errors.drug && (
+                                <p className="text-red-500">
+                                    {errors.drug.message}
+                                </p>
+                            )}
                         </div>
-
-                        <Error e={errors.drug} />
-
                     </Card>
-                    {errors.root && (
-                        <p className="text-red-500">{errors.root.message}</p>
-                    )}
-
-
-                    <button type="submit" className="w-full  bg-cyan-400 text-[#071a2f] font-bold py-3 rounded-xl hover:shadow-lg">
-                        {isSubmitting ? <Loader className="animate-spin w-5 h-5" /> : "Analyze Patient Risk"}
-                    </button>
-
-                </form>
-            )}
-
-            {result && <ResultUI result={result} />}
-
-        </div>
-    );
-}
-
-function Card({ num, title, desc, children }: any) {
-
-    return (
-        <div className="bg-white rounded-2xl shadow-sm border p-6 ">
-
-            <div className="flex gap-3 mb-3">
-
-                <div className="w-6 h-6 rounded-full bg-cyan-400 text-white flex items-center justify-center text-xs font-bold">
-                    {num}
                 </div>
 
-                <div>
-
-                    <div className="font-semibold">
-                        {title}
-                    </div>
-
-                    <div className="text-xs text-gray-500">
-                        {desc}
-                    </div>
-
-                </div>
-
-            </div>
-
-            {children}
-
-        </div>
-    );
-}
-
-function Error({ e }: any) {
-    if (!e) return null;
-    return (
-        <div className="text-red-500 text-sm mt-2">
-            {e.message}
-        </div>
-    );
-}
-
-
-function ResultUI({ result }: any) {
-
-    const colors: Record<string, string> = {
-        Safe: "border-green-500 bg-green-50 text-green-700",
-        "Adjust Dosage": "border-yellow-500 bg-yellow-50 text-yellow-700",
-        Toxic: "border-red-500 bg-red-50 text-red-700",
-    };
-
-    const riskColor = colors[result?.risk] || "border-gray-300 bg-gray-50";
-
-return (
-
-    <div className="space-y-6">
-
-        {/* Legend */}
-        <div className="bg-white rounded-xl p-6 border shadow-sm">
-
-            <div className="font-semibold mb-3">
-                Risk Label
-            </div>
-
-            <div className={clsx(
-                "border rounded-lg p-4 text-center font-semibold text-lg",
-                colors[result.risk]
-            )}>
-                {result.risk}
-            </div>
-
-        </div>
-
-        {/* Risk Assessment Card */}
-            <div className="bg-white border rounded-xl p-6 shadow-sm">
-
-                <div className="font-semibold mb-3">
-                    Risk Assessment
-                </div>
-
-                <div className={clsx("border rounded-lg p-4", riskColor)}>
-
-                    <div className="font-semibold text-lg">
-                        {result?.risk}
-                    </div>
-
-                    <div className="text-sm mt-1">
-                        Confidence: {result?.confidence}%
-                    </div>
-
-                </div>
-
-            </div>
-
-            {/* AI Explanation */}
-            <div className="bg-white border rounded-xl p-6 shadow-sm">
-
-                <div className="font-semibold mb-3">
-                    AI Explanation
-                </div>
-
-                <p className="text-gray-600 text-sm">
-                    {result?.explanation || "No explanation available"}
-                </p>
-
-            </div>
-
-            {/* JSON Actions */}
-            <div className="bg-white border rounded-xl p-6 shadow-sm flex gap-3">
-
-                <button
-                    onClick={() => {
-                        navigator.clipboard.writeText(
-                            JSON.stringify(result?.raw || result, null, 2)
-                        );
-                    }}
-                    className="border px-4 py-2 rounded-lg hover:bg-gray-50"
-                >
-                    Copy JSON
+                <button disabled={mutation.isPending} type="submit" className="mt-8 w-full px-6 py-3 bg-teal-500 text-white rounded-xl hover:bg-teal-600 transition-colors cursor-pointer">
+                    {mutation.isPending
+                        ? "Analyzing..."
+                        : "Analyze Patient Risk"}
                 </button>
+            </form>
 
-                <button
-                    onClick={() => {
-
-                        const blob = new Blob(
-                            [JSON.stringify(result?.raw || result, null, 2)],
-                            { type: "application/json" }
-                        );
-
-                        const url = URL.createObjectURL(blob);
-
-                        const a = document.createElement("a");
-                        a.href = url;
-                        a.download = "result.json";
-                        a.click();
-
-                        URL.revokeObjectURL(url);
-
-                    }}
-                    className="border px-4 py-2 rounded-lg hover:bg-gray-50"
-                >
-                    Download JSON
-                </button>
-
-            </div>
-
+             {mutation.isSuccess && (
+        <div className="mt-6 p-4 border rounded bg-green-50">
+          <h3 className="font-bold mb-2">Analysis Result</h3>
+          <pre>
+            {JSON.stringify(mutation.data, null, 2)}
+          </pre>
         </div>
+      )}
 
-    );
-
+      {/* ERROR DISPLAY */}
+      {mutation.isError && (
+        <div className="mt-6 p-4 border rounded bg-red-50 text-red-600">
+          {(
+            mutation.error as any
+          )?.response?.data?.message ||
+            "Something went wrong"}
+        </div>
+      )}
+        </div>
+    )
 }
+
+

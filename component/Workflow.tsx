@@ -1,4 +1,3 @@
-"use client";
 
 const steps = [
   {
@@ -24,34 +23,28 @@ export default function Workflow() {
 
       <div className="max-w-6xl mx-auto px-6 text-center">
 
-        {/* Small Label */}
         <p className="text-cyan-400 tracking-[0.25em] text-sm font-semibold mb-4">
           WORKFLOW
         </p>
 
-        {/* Heading */}
+
         <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
           Three Steps to Insight
         </h2>
 
-        {/* Subtitle */}
         <p className="text-slate-400 max-w-2xl mx-auto mb-20">
           A streamlined pipeline from genomic upload to clinical report.
         </p>
 
-        {/* Line + Steps container */}
         <div className="relative">
 
-          {/* Horizontal Line */}
-          <div className="absolute top-7 left-0 w-full h-[2px] bg-cyan-400/60" />
+          <div className="absolute hidden md:flex top-7 left-0 w-full h-0.5 bg-cyan-400/60" />
 
-          {/* Steps */}
           <div className="relative grid md:grid-cols-3 gap-12">
 
             {steps.map((step, index) => (
               <div key={index} className="flex flex-col items-center">
 
-                {/* Circle */}
                 <div className="
                   w-14 h-14
                   flex items-center justify-center
@@ -66,12 +59,10 @@ export default function Workflow() {
                   {step.number}
                 </div>
 
-                {/* Title */}
                 <h3 className="text-white font-semibold text-lg mb-2">
                   {step.title}
                 </h3>
 
-                {/* Description */}
                 <p className="text-slate-400 text-sm max-w-xs">
                   {step.desc}
                 </p>

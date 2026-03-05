@@ -1,7 +1,6 @@
-"use client";
-
-import { Dna, Pill, FileText, Bot } from "lucide-react";
-
+"use client"
+import { Bot, Dna, FileText, Pill } from "lucide-react";
+import { motion } from "motion/react";
 const features = [
   {
     icon: Dna,
@@ -25,92 +24,43 @@ const features = [
   },
 ];
 
-export default function Features() {
+export default function Feature() {
   return (
-    <section id="features" className="py-24 bg-slate-50">
-      <div className="max-w-6xl mx-auto px-6">
-
-        <div className="text-center mb-16">
-          <p className="text-sm tracking-widest text-cyan-500 font-semibold mb-2">
-            CORE CAPABILITIES
-          </p>
-
-          <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-            Precision at Every Step
-          </h2>
-
-          <p className="text-slate-500 max-w-2xl mx-auto">
-            From raw genomic data to actionable clinical guidance —
-            powered by state-of-the-art pharmacogenomics.
-          </p>
-        </div>
-
-        {/* Cards */}
-        <div className="grid md:grid-cols-3 gap-8">
-
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
-
-            return (
-              <div
-                key={index}
-                className="
-                group
-                relative
-                bg-white
-                rounded-2xl
-                p-8
-                border border-slate-200
-                transition-all duration-300
-                hover:border-cyan-200
-                hover:shadow-lg hover:shadow-cyan-100/50
-                overflow-hidden
-                "
-              >
-
-                {/* Top cyan border */}
-                <div
-                  className="
-                  absolute
-                  top-0 left-0
-                  w-full h-[3px]
-                  bg-transparent
-                  group-hover:bg-gradient-to-r
-                  group-hover:from-cyan-400
-                  group-hover:to-blue-400
-                  transition-all duration-300
-                  "
-                />
-
-                {/* Icon */}
-                <div className="
-                  w-12 h-12
-                  rounded-xl
-                  bg-slate-100
-                  flex items-center justify-center
-                  mb-6
-                  transition-all duration-300
-                  group-hover:bg-cyan-100
-                ">
-                  <Icon className="w-6 h-6 text-slate-700 group-hover:text-cyan-600" />
-                </div>
-
-                {/* Title */}
-                <h3 className="text-lg font-semibold text-slate-900 mb-3">
-                  {feature.title}
-                </h3>
-
-                {/* Description */}
-                <p className="text-slate-500 text-sm leading-relaxed">
-                  {feature.desc}
-                </p>
-
+    <div id="feature" className="w-full min-h-screen bg-[#061a2b]">
+      <div className="w-full max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8 flex flex-col items-center">
+        <motion.div className="text-center mb-16" 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{
+            duration: 0.4,
+            ease: "easeInOut",
+          }}>
+          <p className="text-sm tracking-widest text-cyan-500 font-semibold mb-5">CORE CAPABILITIES</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-100 mb-4">Precision at Every Step</h1>
+          <p className="text-slate-500 max-w-2xl mx-auto">From raw genomic data to actionable clinical guidance — powered by state-of-the-art pharmacogenomics.</p>
+        </motion.div>
+        <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{
+              duration: 0.4,
+              ease: "easeInOut",
+            }}>
+          {features.map((feature, index) => (
+            <div key={index} className="w-full max-w-xl bg-[#0b1e33] rounded-lg p-8 mb-4 flex flex-col items-start space-y-8 hover:shadow-lg hover:scale-[1.02] transition-transform duration-300 hover:shadow-teal-600 hover:border-t-2 hover:border-cyan-500">
+              <div className="w-12 h-12 flex justify-center items-center bg-[#0c2a4d] rounded-2xl">
+                <feature.icon className="h-7 w-7 text-cyan-500" />
               </div>
-            );
-          })}
-
-        </div>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-100">{feature.title}</h3>
+                <p className="text-slate-500 text-sm mt-2">{feature.desc}</p>
+              </div>
+            </div>
+          ))}
+        </motion.div>
       </div>
-    </section>
-  );
+    </div>
+  )
 }
