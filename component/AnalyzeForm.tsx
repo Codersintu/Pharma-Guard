@@ -99,8 +99,8 @@ export default function AnalyzeForm() {
                         </label>
                     </Card>
 
-                    <Card num={2} title="Drug Selection" desc="Select drugs to analyze">
-                        <div className="grid grid-cols-3 gap-3">
+                    <Card num={2} title="Drug Selection" desc="Select max one drugs to analyze">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                             {drugs.map((d, idx) => (
                                 <label key={idx} className="border border-gray-300 rounded-lg p-3 hover:border-cyan-400 cursor-pointer">
                                     <input type="checkbox"
@@ -123,7 +123,7 @@ export default function AnalyzeForm() {
                 </div>
                 {mutation.isPending ? <div className="w-full mt-8 flex items-center justify-center"><Loader className="animate-spin w-12 h-12" /></div> :
                     <button disabled={mutation.isPending} type="submit" className="mt-8 w-full px-6 py-3 bg-teal-500 text-white rounded-xl hover:bg-teal-600 transition-colors cursor-pointer">
-                        "Analyze Patient Risk"
+                        Analyze Patient Risk
                     </button>
                 }
             </form>
