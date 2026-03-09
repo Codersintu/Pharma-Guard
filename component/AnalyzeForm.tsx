@@ -70,7 +70,7 @@ export default function AnalyzeForm() {
             <form onSubmit={handleSubmit(Onsubmit)}>
                 <div className="flex flex-col md:flex-row gap-8 lg:flex-row">
                     <Card num={1} title="Genomic Data Upload" desc="Upload VCF file containing genetic variants">
-                        <label className="border border-dashed border-gray-400 rounded-lg px-30 py-10 flex flex-col items-center cursor-pointer hover:border-teal-500 hover:bg-gray-100">
+                        <label className="border border-dashed border-gray-400 rounded-lg px-20 md:px-30 py-10 flex flex-col items-center cursor-pointer hover:border-teal-500 hover:bg-gray-100">
                             <input
                                 type="file"
                                 accept=".vcf"
@@ -121,8 +121,8 @@ export default function AnalyzeForm() {
                         </div>
                     </Card>
                 </div>
-                {mutation.isPending ? <div className="w-full mt-8 flex items-center justify-center"><Loader className="animate-spin w-12 h-12" /></div> :
-                    <button disabled={mutation.isPending} type="submit" className="mt-8 w-full px-6 py-3 bg-teal-500 text-white rounded-xl hover:bg-teal-600 transition-colors cursor-pointer">
+                {mutation.isPending ? <div className="w-full flex items-center justify-center"><Loader className="animate-spin w-12 h-12" /></div> :
+                    <button disabled={mutation.isPending} type="submit" className="w-full mt-8 mb-5 px-6 py-3 bg-teal-500 text-white rounded-xl hover:bg-teal-600 transition-colors cursor-pointer">
                         Analyze Patient Risk
                     </button>
                 }
