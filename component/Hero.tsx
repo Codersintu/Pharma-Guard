@@ -41,8 +41,8 @@ export default function Hero() {
 
                             <div className="flex items-center gap-4 mt-8">
 
-                                <button onClick={() => router.push("/analyze")} className="inline-flex bg-linear-to-br from-[#00c9b1] to-[#00b5a0] text-[#061a2b]font-bold text-[16px] px-8 py-3.5 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,201,177,0.35)] active:translate-y-0 tracking-wider"> ✓ Analyze Patient</button>
-                                <button className="border border-gray-500 text-gray-300 px-8 py-3 rounded-xl font-semibold hover:border-white/5 -tracking-tighter cursor-pointer">▶ Watch Demo</button>
+                                <button onClick={() => router.push("/analyze")} className="inline-flex bg-linear-to-br from-[#00c9b1] to-[#00b5a0] text-[#061a2b]font-bold text-[16px] px-6 md:px-8 py-2 md:py-3.5 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,201,177,0.35)] active:translate-y-0 tracking-wider"> ✓ Analyze Patient</button>
+                                <button className="border border-gray-500 text-gray-300 px-4 md:px-8 py-2 md:py-3 rounded-xl font-semibold hover:border-white/5 -tracking-tighter cursor-pointer">▶ Watch Demo</button>
                             </div>
 
                             <span className="bg-gray-700 w-full h-px mt-12 mb-12 block"></span>
